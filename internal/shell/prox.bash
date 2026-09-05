@@ -95,7 +95,7 @@ else
             shift
         fi
         if (( $# != 0 )); then
-            printf 'prox: V0.1 does not accept arguments for `prox on`\n' >&2
+            printf 'prox: `prox on` does not accept arguments\n' >&2
             return 2
         fi
 
@@ -132,7 +132,7 @@ else
 
     _prox_off() {
         if (( $# != 0 )); then
-            printf 'prox: V0.1 does not accept arguments for `prox off`\n' >&2
+            printf 'prox: `prox off` does not accept arguments\n' >&2
             return 2
         fi
         if [[ $__PROX_ACTIVE != 1 ]]; then

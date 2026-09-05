@@ -6,7 +6,7 @@
 
 它不提供代理服务，也不管理 Clash、V2Ray、企业代理或 VPN。它只负责安全地设置当前终端及其子进程使用的代理环境变量，并检查配置的代理是否可用。
 
-> 当前版本：V0.1，支持 Linux、Bash 4.3+ 和 HTTP Proxy。
+> 当前版本：V0.2.0，支持 Linux、Bash 4.3+ 和 HTTP Proxy。
 
 ## 为什么需要 prox
 
@@ -53,7 +53,7 @@ curl -fsSL https://raw.githubusercontent.com/luhuadong/prox/main/scripts/install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/luhuadong/prox/main/scripts/install.sh |
-  sh -s -- --version v0.1.1 --bin-dir "$HOME/.local/bin"
+  sh -s -- --version v0.2.0 --bin-dir "$HOME/.local/bin"
 ```
 
 如果希望先审阅脚本：
@@ -242,7 +242,7 @@ ${XDG_CONFIG_HOME}/prox/config.json
 ~/.config/prox/config.json
 ```
 
-配置文件不存在时，使用内置默认值，不会报错。
+安装脚本、Go 安装、源码安装、deb 和 rpm 都不会自动创建用户配置文件。配置文件不存在时，`prox` 使用内置默认值，不会报错。
 
 查看默认路径：
 
@@ -262,13 +262,36 @@ prox config show
 prox config init --proxy http://127.0.0.1:7897
 ```
 
-配置以权限 `0600` 创建，已有文件不会被覆盖。确认配置合法：
+不传 `--proxy` 时会写入默认地址 `http://127.0.0.1:7890`。生成的最小配置为：
+
+```json
+{
+  "proxy_url": "http://127.0.0.1:7897"
+}
+```
+
+其他字段继续继承内置默认值。配置以权限 `0600` 创建，已有文件不会被覆盖。确认配置合法：
 
 ```bash
 prox config validate
 ```
 
-需要明确替换已有文件时可以执行 `prox config init --force`。
+需要明确替换已有文件时可以执行：
+
+```bash
+prox config init --proxy http://127.0.0.1:7897 --force
+```
+
+所有字段都是可选的：
+
+| 字段 | 内置默认值 | 说明 |
+| --- | --- | --- |
+| `proxy_url` | `http://127.0.0.1:7890` | 当前使用的 HTTP Proxy URL |
+| `no_proxy` | `localhost,127.0.0.1,::1,.local` | 不经过代理的主机或域名列表 |
+| `check_url` | `https://www.google.com/generate_204` | 完整健康检查访问的地址 |
+| `expected_status` | `204` | 默认检查期望的 HTTP 状态码 |
+| `connect_timeout` | `2s` | 连接代理端点的超时时间 |
+| `request_timeout` | `8s` | 完整 HTTP 检查的超时时间 |
 
 完整示例：
 
@@ -288,14 +311,17 @@ prox config validate
 }
 ```
 
+配置使用严格 JSON：未知字段、多余 JSON 值、非法 URL 或非正数超时都会报错。超时使用 Go duration 格式，例如 `500ms`、`2s`、`1m`。当前只接受不带认证信息的 `http://` 代理地址。
+
 也可以为单次操作指定配置文件：
 
 ```bash
+prox --config /path/to/config.json config init
 prox --config /path/to/config.json check
 prox --config /path/to/config.json on
 ```
 
-V0.1 只支持一个默认配置，不支持命名 Profile。
+`--config PATH` 会选择另一份配置文件，不会再读取或合并默认用户配置文件；配置文件中省略的字段仍继承内置默认值。未传 `--config` 时使用默认用户配置文件。当前版本只支持一份配置，不支持命名 Profile。
 
 ## 设置的环境变量
 
@@ -311,7 +337,7 @@ no_proxy
 NO_PROXY
 ```
 
-V0.1 不设置或删除大写 `HTTP_PROXY`。如果它已经存在，`prox on` 会给出警告。
+当前版本不设置或删除大写 `HTTP_PROXY`。如果它已经存在，`prox on` 会给出警告。
 
 代理环境变量是广泛使用的事实约定，但并非所有程序都会读取它们。`prox` 不修改以下持久配置：
 
@@ -360,9 +386,9 @@ State: drifted
 - 目标命令不存在返回 `127`；
 - 目标命令启动后，退出状态由目标命令决定。
 
-## V0.1 边界
+## 当前限制
 
-V0.1 暂不支持：
+当前版本暂不支持：
 
 - SOCKS5 / SOCKS5H；
 - 多 Profile；
@@ -374,7 +400,7 @@ V0.1 暂不支持：
 - 自动修改 `.bashrc`；
 - macOS 和 Windows。
 
-这些边界是有意设置的，目的是先验证最核心的终端代理开关和检查体验。
+这些边界是有意设置的，目的是保持终端代理开关和检查体验简单、可预测。
 
 ## 工程结构
 

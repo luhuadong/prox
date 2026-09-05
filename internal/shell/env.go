@@ -7,7 +7,7 @@ import (
 	"github.com/luhuadong/prox/internal/config"
 )
 
-// ManagedVariables is the complete set changed by prox V0.1.
+// ManagedVariables is the complete set changed by prox.
 var ManagedVariables = []string{
 	"http_proxy",
 	"https_proxy",

@@ -193,20 +193,20 @@ func (c Config) Validate() error {
 	return nil
 }
 
-// ParseProxyURL parses a V0.1 HTTP proxy URL.
+// ParseProxyURL parses a supported HTTP proxy URL.
 func ParseProxyURL(raw string) (*url.URL, error) {
 	u, err := url.Parse(raw)
 	if err != nil {
 		return nil, fmt.Errorf("invalid proxy_url: %w", err)
 	}
 	if u.Scheme != "http" {
-		return nil, fmt.Errorf("unsupported proxy scheme %q; V0.1 supports http only", u.Scheme)
+		return nil, fmt.Errorf("unsupported proxy scheme %q; prox currently supports http only", u.Scheme)
 	}
 	if u.Hostname() == "" {
 		return nil, fmt.Errorf("proxy_url must include a host")
 	}
 	if u.User != nil {
-		return nil, fmt.Errorf("proxy authentication is not supported in V0.1")
+		return nil, fmt.Errorf("proxy authentication is not currently supported")
 	}
 	if u.Path != "" && u.Path != "/" {
 		return nil, fmt.Errorf("proxy_url must not include a path")

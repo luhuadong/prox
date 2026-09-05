@@ -414,7 +414,7 @@ func runShellEnvironment(arguments []string, configPath string, stdout, stderr i
 		return 1
 	}
 	if value, exists := os.LookupEnv("HTTP_PROXY"); exists && value != "" {
-		fmt.Fprintln(stderr, "Warning: HTTP_PROXY is already set and is not managed by prox V0.1.")
+		fmt.Fprintln(stderr, "Warning: HTTP_PROXY is already set and is not managed by prox.")
 	}
 	if _, err := io.WriteString(stdout, shell.BashEnvironmentScript(cfg)); err != nil {
 		fmt.Fprintf(stderr, "prox: write Shell environment: %v\n", err)

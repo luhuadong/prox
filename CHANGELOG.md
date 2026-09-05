@@ -2,7 +2,7 @@
 
 本项目遵循语义化版本。
 
-## Unreleased
+## 0.2.0 - 2026-09-06
 
 - 修正 Go module 路径，支持版本化 `go install`；
 - 增加 Linux amd64/arm64 的自动化 Release 构建与校验和；

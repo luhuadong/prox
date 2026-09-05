@@ -14,7 +14,7 @@ Usage:
   install.sh [--version VERSION] [--bin-dir DIRECTORY]
 
 Options:
-  --version VERSION    Release to install, for example v0.1.1 (default: latest)
+  --version VERSION    Release to install, for example v0.2.0 (default: latest)
   --bin-dir DIRECTORY  Installation directory (default: ~/.local/bin)
   -h, --help           Show this help
 USAGE
