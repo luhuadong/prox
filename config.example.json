@@ -1,0 +1,13 @@
+{
+  "proxy_url": "http://127.0.0.1:7890",
+  "no_proxy": [
+    "localhost",
+    "127.0.0.1",
+    "::1",
+    ".local"
+  ],
+  "check_url": "https://www.google.com/generate_204",
+  "expected_status": 204,
+  "connect_timeout": "2s",
+  "request_timeout": "8s"
+}

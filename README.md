@@ -1,5 +1,7 @@
 # prox
 
+`prox` is a simple, safe, and diagnosable proxy environment manager for Linux terminals.
+
 `prox` 为 Linux 终端提供一套简单、可靠、可诊断的代理开关。
 
 它不提供代理服务，也不管理 Clash、V2Ray、企业代理或 VPN。它只负责安全地设置当前终端及其子进程使用的代理环境变量，并检查配置的代理是否可用。
@@ -42,6 +44,8 @@ prox run -- <command>
 - Bash 4.3 或更高版本。
 
 ```bash
+git clone https://github.com/luhuadong/prox.git
+cd prox
 make test
 make build
 ```
@@ -315,23 +319,15 @@ make check
 - HTTP 状态码检查；
 - Bash 环境快照、幂等启用、漂移检测和恢复。
 
-### 发布前设置 Module Path
-
-这份首版源码包尚未绑定具体代码托管账号，因此 `go.mod` 暂时使用：
+### Module Path
 
 ```text
-module prox
-```
-
-这不影响克隆后的本地构建。正式创建公开仓库后，应将它和项目内的 `prox/internal/...` 导入路径一次性替换为仓库的规范地址，例如：
-
-```text
-github.com/<owner>/prox
+github.com/luhuadong/prox
 ```
 
 ## 安全
 
-发现安全问题时，请不要公开披露利用细节。参见 [SECURITY.md](SECURITY.md)。
+发现安全问题时，请不要公开披露利用细节。参见 [SECURITY.md](SECURITY.md)，或发送邮件至 [luhuadong@163.com](mailto:luhuadong@163.com)。
 
 ## License
 
