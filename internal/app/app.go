@@ -23,6 +23,7 @@ Usage:
 
 Commands:
   init bash             Print the Bash integration script
+  config <command>      Inspect or create user configuration
   on                    Enable the proxy in the current Shell (requires init)
   off                   Restore the previous Shell environment (requires init)
   status                Show activation state without accessing the network
@@ -71,6 +72,8 @@ func Run(arguments []string, stdin io.Reader, stdout, stderr io.Writer, version 
 		return 0
 	case "init":
 		return runInit(commandArguments, stdout, stderr, version)
+	case "config":
+		return runConfig(commandArguments, global.configPath, stdout, stderr)
 	case "on", "off":
 		return shellIntegrationRequired(command, stderr)
 	case "status":
@@ -86,6 +89,116 @@ func Run(arguments []string, stdin io.Reader, stdout, stderr io.Writer, version 
 		fmt.Fprintln(stderr, "Run `prox help` for usage.")
 		return 2
 	}
+}
+
+func runConfig(arguments []string, explicitPath string, stdout, stderr io.Writer) int {
+	if len(arguments) == 0 {
+		writeConfigUsage(stdout)
+		return 0
+	}
+
+	path := explicitPath
+	if path == "" {
+		var err error
+		path, err = config.DefaultPath()
+		if err != nil {
+			fmt.Fprintf(stderr, "prox: %v\n", err)
+			return 2
+		}
+	}
+
+	switch arguments[0] {
+	case "path":
+		if len(arguments) != 1 {
+			fmt.Fprintln(stderr, "Usage: prox [--config PATH] config path")
+			return 2
+		}
+		fmt.Fprintln(stdout, path)
+		return 0
+	case "show":
+		if len(arguments) != 1 {
+			fmt.Fprintln(stderr, "Usage: prox [--config PATH] config show")
+			return 2
+		}
+		cfg, err := config.Load(explicitPath)
+		if err != nil {
+			fmt.Fprintf(stderr, "prox: %v\n", err)
+			return 2
+		}
+		data, err := config.MarshalEffective(cfg)
+		if err != nil {
+			fmt.Fprintf(stderr, "prox: %v\n", err)
+			return 1
+		}
+		fmt.Fprintf(stdout, "Config: %s\n", cfg.Source)
+		_, _ = stdout.Write(data)
+		return 0
+	case "validate":
+		if len(arguments) != 1 {
+			fmt.Fprintln(stderr, "Usage: prox [--config PATH] config validate")
+			return 2
+		}
+		cfg, err := config.Load(explicitPath)
+		if err != nil {
+			fmt.Fprintf(stderr, "prox: %v\n", err)
+			return 2
+		}
+		fmt.Fprintf(stdout, "Config is valid: %s\n", cfg.Source)
+		return 0
+	case "init":
+		return runConfigInit(arguments[1:], path, stdout, stderr)
+	case "help", "--help", "-h":
+		writeConfigUsage(stdout)
+		return 0
+	default:
+		fmt.Fprintf(stderr, "prox: unknown config command %q\n", arguments[0])
+		writeConfigUsage(stderr)
+		return 2
+	}
+}
+
+func runConfigInit(arguments []string, path string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("config init", flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+	proxyURL := flags.String("proxy", config.DefaultProxyURL, "proxy URL")
+	force := flags.Bool("force", false, "replace an existing configuration")
+	if err := flags.Parse(arguments); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			fmt.Fprintln(stdout, "Usage: prox [--config PATH] config init [--proxy URL] [--force]")
+			return 0
+		}
+		fmt.Fprintf(stderr, "prox: %v\n", err)
+		fmt.Fprintln(stderr, "Usage: prox [--config PATH] config init [--proxy URL] [--force]")
+		return 2
+	}
+	if flags.NArg() != 0 {
+		fmt.Fprintln(stderr, "prox: config init does not accept positional arguments")
+		return 2
+	}
+	if err := config.Initialize(path, *proxyURL, *force); err != nil {
+		if errors.Is(err, config.ErrConfigExists) {
+			fmt.Fprintf(stderr, "prox: %v; use --force to replace it\n", err)
+			return 1
+		}
+		fmt.Fprintf(stderr, "prox: initialize config: %v\n", err)
+		return 2
+	}
+	fmt.Fprintf(stdout, "Created config: %s\n", path)
+	return 0
+}
+
+func writeConfigUsage(writer io.Writer) {
+	fmt.Fprintln(writer, `Usage: prox [--config PATH] config <command>
+
+Commands:
+  path                  Print the configuration path
+  show                  Print the effective configuration
+  init [options]        Create a minimal user configuration
+  validate              Validate the effective configuration
+
+Init options:
+  --proxy URL           Set the proxy URL
+  --force               Replace an existing configuration`)
 }
 
 func parseGlobalOptions(arguments []string) (globalOptions, error) {

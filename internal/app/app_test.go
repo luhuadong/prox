@@ -87,3 +87,50 @@ func TestCheckLocal(t *testing.T) {
 		t.Fatalf("stdout = %q", stdout.String())
 	}
 }
+
+func TestConfigCommands(t *testing.T) {
+	configHome := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", configHome)
+	path := filepath.Join(configHome, "prox", "config.json")
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := Run([]string{"config", "path"}, strings.NewReader(""), &stdout, &stderr, "test")
+	if code != 0 || strings.TrimSpace(stdout.String()) != path {
+		t.Fatalf("path: code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	code = Run(
+		[]string{"config", "init", "--proxy", "http://localhost:8080"},
+		strings.NewReader(""),
+		&stdout,
+		&stderr,
+		"test",
+	)
+	if code != 0 {
+		t.Fatalf("init: code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	code = Run([]string{"config", "show"}, strings.NewReader(""), &stdout, &stderr, "test")
+	if code != 0 || !strings.Contains(stdout.String(), `"proxy_url": "http://localhost:8080"`) {
+		t.Fatalf("show: code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	code = Run([]string{"config", "validate"}, strings.NewReader(""), &stdout, &stderr, "test")
+	if code != 0 || !strings.Contains(stdout.String(), "Config is valid") {
+		t.Fatalf("validate: code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	code = Run([]string{"config", "init"}, strings.NewReader(""), &stdout, &stderr, "test")
+	if code != 1 || !strings.Contains(stderr.String(), "--force") {
+		t.Fatalf("duplicate init: code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
+	}
+}
