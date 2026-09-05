@@ -9,6 +9,8 @@
 - 增加校验 Release 制品的用户安装脚本；
 - 增加 `make install`、`make uninstall` 和安装测试；
 - 增加 `prox config path/show/init/validate`；
+- 增加 Bash completion 和 `prox completion bash`；
+- Release 同时生成 Linux `.deb` 和 `.rpm` 软件包；
 - 修复 Shell Hook 对全局 `--config` 参数的转发。
 
 ## 0.1.0 - 2026-09-05

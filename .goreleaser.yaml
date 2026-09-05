@@ -35,6 +35,26 @@ archives:
 checksum:
   name_template: checksums.txt
 
+nfpms:
+  - id: linux-packages
+    ids:
+      - prox
+    package_name: prox
+    file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    vendor: prox contributors
+    homepage: https://github.com/luhuadong/prox
+    maintainer: luhuadong <luhuadong@163.com>
+    description: Safe and diagnosable proxy environment manager for Linux terminals
+    license: Apache-2.0
+    section: utils
+    priority: optional
+    formats:
+      - deb
+      - rpm
+    contents:
+      - src: internal/shell/completion.bash
+        dst: /usr/share/bash-completion/completions/prox
+
 changelog:
   sort: asc
   filters:

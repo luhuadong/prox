@@ -56,6 +56,21 @@ func TestInitBash(t *testing.T) {
 	if !strings.Contains(stdout.String(), "__PROX_HOOK_VERSION='1.2.3'") {
 		t.Fatal("generated hook does not contain the version")
 	}
+	if !strings.Contains(stdout.String(), "complete -F _prox_completion prox") {
+		t.Fatal("generated hook does not contain completion")
+	}
+}
+
+func TestCompletionBash(t *testing.T) {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := Run([]string{"completion", "bash"}, strings.NewReader(""), &stdout, &stderr, "test")
+	if code != 0 {
+		t.Fatalf("code = %d, stderr = %q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "complete -F _prox_completion prox") {
+		t.Fatal("generated Bash completion is incomplete")
+	}
 }
 
 func TestCheckLocal(t *testing.T) {

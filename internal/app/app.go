@@ -23,6 +23,7 @@ Usage:
 
 Commands:
   init bash             Print the Bash integration script
+  completion bash       Print Bash completion
   config <command>      Inspect or create user configuration
   on                    Enable the proxy in the current Shell (requires init)
   off                   Restore the previous Shell environment (requires init)
@@ -72,6 +73,8 @@ func Run(arguments []string, stdin io.Reader, stdout, stderr io.Writer, version 
 		return 0
 	case "init":
 		return runInit(commandArguments, stdout, stderr, version)
+	case "completion":
+		return runCompletion(commandArguments, stdout, stderr)
 	case "config":
 		return runConfig(commandArguments, global.configPath, stdout, stderr)
 	case "on", "off":
@@ -232,6 +235,18 @@ func runInit(arguments []string, stdout, stderr io.Writer, version string) int {
 	}
 	if _, err := io.WriteString(stdout, shell.BashHook(version)); err != nil {
 		fmt.Fprintf(stderr, "prox: write Bash integration: %v\n", err)
+		return 1
+	}
+	return 0
+}
+
+func runCompletion(arguments []string, stdout, stderr io.Writer) int {
+	if len(arguments) != 1 || arguments[0] != "bash" {
+		fmt.Fprintln(stderr, "Usage: prox completion bash")
+		return 2
+	}
+	if _, err := io.WriteString(stdout, shell.BashCompletion()); err != nil {
+		fmt.Fprintf(stderr, "prox: write Bash completion: %v\n", err)
 		return 1
 	}
 	return 0

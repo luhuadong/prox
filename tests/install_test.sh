@@ -8,6 +8,7 @@ trap 'rm -rf "$temporary_dir"' EXIT
 make -C "$project_dir" --no-print-directory install \
     DESTDIR="$temporary_dir/root" PREFIX=/usr >/dev/null
 [[ -x "$temporary_dir/root/usr/bin/prox" ]]
+[[ -f "$temporary_dir/root/usr/share/bash-completion/completions/prox" ]]
 
 case "$(uname -m)" in
     x86_64|amd64) arch=amd64 ;;

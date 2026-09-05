@@ -17,9 +17,12 @@ build:
 install: build
 	$(INSTALL) -d "$(DESTDIR)$(BINDIR)"
 	$(INSTALL) -m 0755 dist/prox "$(DESTDIR)$(BINDIR)/prox"
+	$(INSTALL) -d "$(DESTDIR)$(PREFIX)/share/bash-completion/completions"
+	$(INSTALL) -m 0644 internal/shell/completion.bash "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/prox"
 
 uninstall:
 	rm -f "$(DESTDIR)$(BINDIR)/prox"
+	rm -f "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/prox"
 
 fmt:
 	gofmt -w cmd internal
@@ -32,7 +35,9 @@ test:
 
 test-shell:
 	bash -n internal/shell/prox.bash
+	bash -n internal/shell/completion.bash
 	bash tests/bash_hook_test.sh
+	bash tests/completion_test.sh
 
 test-install:
 	bash tests/install_test.sh

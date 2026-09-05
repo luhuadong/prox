@@ -47,6 +47,8 @@ curl -fsSL https://raw.githubusercontent.com/luhuadong/prox/main/scripts/install
 
 安装器会检测 Linux CPU 架构、下载对应的预编译包并验证 SHA-256 校验和。它不会修改 Shell 配置或创建代理配置文件。
 
+每个 Release 也提供可直接交给系统包管理器安装的 `.deb` 和 `.rpm` 文件；系统包会同时安装 Bash completion。
+
 安装指定版本或目录：
 
 ```bash
@@ -134,6 +136,12 @@ source ~/.bashrc
 ```
 
 这里加载的只是 Shell Hook，不会自动开启代理，也不会访问网络。
+
+Shell Hook 同时启用 Bash completion。也可以单独输出 completion，交给其他安装方式管理：
+
+```bash
+prox completion bash
+```
 
 ## 快速开始
 
