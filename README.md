@@ -1,7 +1,5 @@
 # prox
 
-`prox` is a simple, safe, and diagnosable proxy environment manager for Linux terminals.
-
 `prox` 为 Linux 终端提供一套简单、可靠、可诊断的代理开关。
 
 它不提供代理服务，也不管理 Clash、V2Ray、企业代理或 VPN。它只负责安全地设置当前终端及其子进程使用的代理环境变量，并检查配置的代理是否可用。
