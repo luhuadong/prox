@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"prox/internal/config"
-	"prox/internal/health"
-	"prox/internal/runner"
-	"prox/internal/shell"
+	"github.com/luhuadong/prox/internal/config"
+	"github.com/luhuadong/prox/internal/health"
+	"github.com/luhuadong/prox/internal/runner"
+	"github.com/luhuadong/prox/internal/shell"
 )
 
 const usageText = `prox safely manages proxy environment variables for terminal commands.

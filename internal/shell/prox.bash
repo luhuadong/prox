@@ -86,6 +86,14 @@ else
     }
 
     _prox_on() {
+        local -a global_options=()
+        while (( $# > 0 )) && [[ $1 != -- ]]; do
+            global_options+=("$1")
+            shift
+        done
+        if (( $# > 0 )); then
+            shift
+        fi
         if (( $# != 0 )); then
             printf 'prox: V0.1 does not accept arguments for `prox on`\n' >&2
             return 2
@@ -102,7 +110,7 @@ else
         fi
 
         local generated name status
-        generated="$(command prox __shell-env bash)"
+        generated="$(command prox "${global_options[@]}" __shell-env bash)"
         status=$?
         if (( status != 0 )); then
             return "$status"
@@ -140,6 +148,14 @@ else
     }
 
     _prox_status() {
+        local -a global_options=()
+        while (( $# > 0 )) && [[ $1 != -- ]]; do
+            global_options+=("$1")
+            shift
+        done
+        if (( $# > 0 )); then
+            shift
+        fi
         local state='inactive'
         if [[ $__PROX_ACTIVE == 1 ]]; then
             state='active'
@@ -150,7 +166,7 @@ else
 
         PROX_INTERNAL_STATE="$state" \
         PROX_INTERNAL_PROXY="$__PROX_PROXY_DISPLAY" \
-            command prox status "$@"
+            command prox "${global_options[@]}" status "$@"
     }
 
     prox() {
@@ -159,20 +175,50 @@ else
             return $?
         fi
 
+        local -a global_options=()
+        while (( $# > 0 )); do
+            case "$1" in
+                --config)
+                    if (( $# < 2 )) || [[ -z $2 ]]; then
+                        printf 'prox: --config requires a path\n' >&2
+                        return 2
+                    fi
+                    global_options+=("$1" "$2")
+                    shift 2
+                    ;;
+                --config=*)
+                    if [[ $1 == --config= ]]; then
+                        printf 'prox: --config requires a path\n' >&2
+                        return 2
+                    fi
+                    global_options+=("$1")
+                    shift
+                    ;;
+                *)
+                    break
+                    ;;
+            esac
+        done
+
+        if (( $# == 0 )); then
+            command prox "${global_options[@]}"
+            return $?
+        fi
+
         local subcommand="$1"
         shift
         case "$subcommand" in
             on)
-                _prox_on "$@"
+                _prox_on "${global_options[@]}" -- "$@"
                 ;;
             off)
                 _prox_off "$@"
                 ;;
             status)
-                _prox_status "$@"
+                _prox_status "${global_options[@]}" -- "$@"
                 ;;
             *)
-                command prox "$subcommand" "$@"
+                command prox "${global_options[@]}" "$subcommand" "$@"
                 ;;
         esac
     }

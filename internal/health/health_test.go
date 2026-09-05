@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"prox/internal/config"
+	"github.com/luhuadong/prox/internal/config"
 )
 
 func TestCheckEndpoint(t *testing.T) {

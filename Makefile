@@ -1,5 +1,5 @@
 GO ?= go
-VERSION ?= 0.1.0
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
 .PHONY: all build fmt fmt-check test test-shell vet check clean
 

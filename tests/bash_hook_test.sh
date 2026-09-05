@@ -9,8 +9,20 @@ cat >"$temporary_dir/prox" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
 
+config_path=''
+if [[ ${1:-} == --config ]]; then
+    config_path="${2:-}"
+    shift 2
+elif [[ ${1:-} == --config=* ]]; then
+    config_path="${1#--config=}"
+    shift
+fi
+
 case "${1:-}" in
     __shell-env)
+        if [[ -n $config_path ]]; then
+            printf '%s\n' "$config_path" >"${PROX_STUB_CONFIG_LOG:?}"
+        fi
         if [[ ${PROX_STUB_FAIL:-0} == 1 ]]; then
             printf 'stub endpoint unavailable\n' >&2
             exit 1
@@ -37,6 +49,7 @@ esac
 STUB
 chmod +x "$temporary_dir/prox"
 PATH="$temporary_dir:$PATH"
+export PROX_STUB_CONFIG_LOG="$temporary_dir/config.log"
 
 unset http_proxy https_proxy all_proxy HTTPS_PROXY ALL_PROXY no_proxy NO_PROXY
 export http_proxy='http://original.example:8080'
@@ -74,6 +87,13 @@ prox off >/dev/null 2>/dev/null
 [[ ! -v ALL_PROXY ]]
 
 # Repeated deactivation is also idempotent.
+prox off >/dev/null
+
+# Global configuration options must still pass through the Shell wrapper.
+prox --config "$temporary_dir/custom.json" on >/dev/null
+[[ "$(<"$PROX_STUB_CONFIG_LOG")" == "$temporary_dir/custom.json" ]]
+status_output="$(prox --config="$temporary_dir/custom.json" status)"
+[[ "$status_output" == *'State: active'* ]]
 prox off >/dev/null
 
 printf 'bash hook tests passed\n'

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"prox/internal/config"
+	"github.com/luhuadong/prox/internal/config"
 )
 
 func TestQuoteBash(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"prox/internal/config"
+	"github.com/luhuadong/prox/internal/config"
 )
 
 // ManagedVariables is the complete set changed by prox V0.1.

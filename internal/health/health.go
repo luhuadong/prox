@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"prox/internal/config"
+	"github.com/luhuadong/prox/internal/config"
 )
 
 // FailureKind identifies the stage that failed without exposing implementation details.
