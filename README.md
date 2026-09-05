@@ -35,7 +35,46 @@ prox run -- <command>
 - 不依赖 curl、nc、jq 或后台守护进程；
 - 不收集遥测数据。
 
-## 构建
+## 安装
+
+### 安装脚本（推荐）
+
+安装最新 GitHub Release 到 `~/.local/bin`：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/luhuadong/prox/main/scripts/install.sh | sh
+```
+
+安装器会检测 Linux CPU 架构、下载对应的预编译包并验证 SHA-256 校验和。它不会修改 Shell 配置或创建代理配置文件。
+
+安装指定版本或目录：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/luhuadong/prox/main/scripts/install.sh |
+  sh -s -- --version v0.1.1 --bin-dir "$HOME/.local/bin"
+```
+
+如果希望先审阅脚本：
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/luhuadong/prox/main/scripts/install.sh
+less install.sh
+sh install.sh
+```
+
+确保 `~/.local/bin` 位于 `PATH` 中。
+
+### 使用 Go 安装
+
+已经安装 Go 1.22 或更高版本时：
+
+```bash
+go install github.com/luhuadong/prox/cmd/prox@latest
+```
+
+确保 `$(go env GOPATH)/bin` 位于 `PATH` 中。
+
+### 从源码安装
 
 要求：
 
@@ -46,25 +85,35 @@ prox run -- <command>
 ```bash
 git clone https://github.com/luhuadong/prox.git
 cd prox
-make test
+make check
+make install PREFIX="$HOME/.local"
+```
+
+只构建而不安装：
+
+```bash
 make build
 ```
 
-生成文件：
+生成的二进制位于 `dist/prox`。
 
-```text
-dist/prox
-```
+### 更新与卸载
 
-安装到当前用户：
+重新运行安装脚本即可更新。卸载用户级安装：
 
 ```bash
-install -Dm755 dist/prox "$HOME/.local/bin/prox"
+rm "$HOME/.local/bin/prox"
 ```
 
-确保 `~/.local/bin` 位于 `PATH` 中。
+源码安装也可以使用对应目录执行：
 
-## Bash 集成
+```bash
+make uninstall PREFIX="$HOME/.local"
+```
+
+## Bash 集成（仅 on/off 需要）
+
+`prox check` 和 `prox run` 安装后可以直接使用。只有 `prox on`、`prox off` 和准确显示当前 Shell 激活状态的 `prox status` 需要加载 Shell Hook。
 
 先在当前终端测试：
 
@@ -87,6 +136,13 @@ source ~/.bashrc
 这里加载的只是 Shell Hook，不会自动开启代理，也不会访问网络。
 
 ## 快速开始
+
+无需创建配置文件即可检查默认代理端点：
+
+```bash
+prox check --local
+prox run -- curl https://www.google.com
+```
 
 ### 检查代理
 
@@ -180,6 +236,32 @@ ${XDG_CONFIG_HOME}/prox/config.json
 
 配置文件不存在时，使用内置默认值，不会报错。
 
+查看默认路径：
+
+```bash
+prox config path
+```
+
+查看合并内置默认值后的完整配置：
+
+```bash
+prox config show
+```
+
+如果默认代理地址不适用，创建最小用户配置：
+
+```bash
+prox config init --proxy http://127.0.0.1:7897
+```
+
+配置以权限 `0600` 创建，已有文件不会被覆盖。确认配置合法：
+
+```bash
+prox config validate
+```
+
+需要明确替换已有文件时可以执行 `prox config init --force`。
+
 完整示例：
 
 ```json
@@ -202,6 +284,7 @@ ${XDG_CONFIG_HOME}/prox/config.json
 
 ```bash
 prox --config /path/to/config.json check
+prox --config /path/to/config.json on
 ```
 
 V0.1 只支持一个默认配置，不支持命名 Profile。
@@ -294,8 +377,10 @@ internal/config/     配置加载和校验
 internal/health/     TCP 与 HTTP 健康检查
 internal/runner/     Linux 目标进程替换
 internal/shell/      环境计算和 Bash Hook
+scripts/             安装脚本
 tests/               Shell 集成测试
 docs/                产品与技术文档
+.github/workflows/   持续集成与 Release 发布
 ```
 
 核心程序使用 Go；Bash Hook 只负责修改当前 Shell、保存环境快照和恢复原状态。
@@ -307,6 +392,8 @@ make fmt
 make test
 make vet
 make check
+make release-check
+make snapshot
 ```
 
 测试包括：
